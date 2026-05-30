@@ -11,19 +11,28 @@
         h1, h2 { font-family: 'Fredoka One', cursive; }
         .game-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .game-card:hover { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .grass-field { background: #98FB98; height: 100px; position: absolute; bottom: 0; width: 100%; border-top-left-radius: 50% 100%; border-top-right-radius: 50% 100%; }
+        .grass { background: #98FB98; height: 120px; position: absolute; bottom: 0; width: 100%; border-top-left-radius: 50% 100%; border-top-right-radius: 50% 100%; }
+        .butterfly { animation: flutter 6s infinite ease-in-out; position: absolute; }
+        @keyframes flutter { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
     </style>
 </head>
-<body class="flex flex-col items-center pt-16 px-4">
+<body class="flex flex-col items-center pt-10 px-4">
 
-    <div class="absolute top-0 w-full h-32 bg-gradient-to-b from-pink-300 via-yellow-200 to-transparent opacity-50"></div>
+    <div class="butterfly text-2xl" style="top: 15%; left: 10%;">🦋</div>
+    <div class="butterfly text-2xl" style="top: 25%; right: 15%; animation-delay: 2s;">🦋</div>
 
-    <header class="text-center z-10 mb-12">
-        <h1 class="text-6xl text-white drop-shadow-lg tracking-wide" style="text-shadow: 3px 3px 0 #FF6B6B;">REEL WORKSHOP</h1>
+    <div class="absolute top-0 w-full h-32 bg-gradient-to-b from-pink-300 via-yellow-200 to-transparent opacity-40"></div>
+
+    <a href="index.html" class="absolute top-5 left-5 z-50 flex items-center gap-2 bg-white px-5 py-3 rounded-full shadow-lg border-2 border-pink-300 text-pink-500 font-bold hover:bg-pink-50 transition-all">
+        <span>🏠</span> Home
+    </a>
+
+    <header class="text-center z-10 mb-12 mt-10">
+        <h1 class="text-6xl text-white drop-shadow-md tracking-wide" style="text-shadow: 4px 4px 0 #FF6B6B;">REEL WORKSHOP</h1>
         <p class="text-2xl text-blue-900 font-bold mt-2">Select a game to start the fun!</p>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl z-10">
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl z-10 px-4">
         <a href="FACT VS OPINION.HTML" class="game-card bg-white p-6 rounded-3xl border-t-8 border-green-400 shadow-xl text-center">
             <h2 class="text-2xl text-green-600 mb-2">Fact vs Opinion</h2>
             <p class="text-gray-600">Test your knowledge with this classroom adventure.</p>
@@ -45,10 +54,10 @@
         </a>
     </main>
 
-    <footer class="mt-auto py-8 text-blue-800 font-bold opacity-70 z-10">
-        <p>ReelGames@2026</p>
-    </footer>
+    <div class="grass z-0"></div>
 
-    <div class="grass-field"></div>
+    <footer class="absolute bottom-5 right-5 z-20 text-gray-400 italic">
+        ReelGames@2026
+    </footer>
 </body>
 </html>
