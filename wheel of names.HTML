@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Names - ReelGames©2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .transition-gpu { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+            .spin-blur { filter: blur(2px) brightness(1.1); }
+            .pulse-glow { animation: pulseGlow 1.5s ease-in-out infinite; }
+            .float-star { animation: floatStar 4s ease-in-out infinite; }
+            .ripple { position: relative; overflow: hidden; }
+            .ripple::after {
+                content: ''; position: absolute; top: 50%; left: 50%;
+                width: 0; height: 0; background: rgba(255,255,255,0.4);
+                border-radius: 50%; transform: translate(-50%, -50%);
+                transition: width 0.6s, height 0.6s;
+            }
+            .ripple:active::after { width: 300%; height: 300%; }
+            .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+            .fullscreen-mode {
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 20px !important;
+                transform: scale(1) !important;
+                overflow: auto !important;
+            }
+        }
+
+        @keyframes pulseGlow {
+            0%,100% { filter: drop-shadow(0 0 6px #FFC107) drop-shadow(0 0 12px #FFC107); }
+            50% { filter: drop-shadow(0 0 12px #FFC107) drop-shadow(0 0 20px #FFC107); }
+        }
+
+        @keyframes floatStar {
+            0%,100% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        }
+
+        @keyframes bounceStop {
+            0%,100% { transform: rotate(var(--r)) translateY(0); }
+            25% { transform: rotate(var(--r)) translateY(-8px); }
+            75% { transform: rotate(var(--r)) translateY(4px); }
+        }
+
+        @keyframes popupShow {
+            0% { transform: scale(0.7) translateY(15px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen font-['Fredoka'] bg-[#FF9F1C] relative overflow-x-hidden transition-all duration-300">
+
+    <!-- ✅ FLOATING ANIMATED STARS -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="float-star absolute text-yellow-200 text-xl" style="top:12%; left:16%; animation-delay:0s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-lg" style="top:28%; left:82%; animation-delay:0.7s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-xl" style="top:52%; left:12%; animation-delay:1.3s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-lg" style="top:72%; left:78%; animation-delay:1.9s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-xl" style="top:88%; left:32%; animation-delay:2.5s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-lg" style="top:18%; left:62%; animation-delay:3.1s">⭐</div>
+        <div class="float-star absolute text-yellow-200 text-2xl" style="top:22%; left:92%; animation-delay:4.9s">✨</div>
+        <div class="float-star absolute text-yellow-200 text-2xl" style="top:78%; left:6%; animation-delay:5.5s">✨</div>
+    </div>
+
+    <div id="mainContainer" class="container mx-auto px-6 py-6 max-w-5xl relative z-10 transition-all duration-300">
+
+        <!-- ✅ FULL SCREEN BUTTON -->
+        <div class="flex justify-end mb-4">
+            <button id="fullscreenBtn" onclick="toggleFullScreen()" class="bg-[#1A237E]/20 hover:bg-[#1A237E]/30 text-[#1A237E] px-4 py-2 rounded-lg font-medium transition-all backdrop-blur-sm shadow-md">
+                📺 Full Screen
+            </button>
+        </div>
+
+        <!-- ✅ TITLE -->
+        <div class="text-center mb-8">
+            <h1 class="text-[42px] font-black text-[#4A4E69] uppercase tracking-wider text-shadow flex items-center justify-center gap-3">
+                🎡 WHEEL OF NAMES 🎡
+            </h1>
+            <p class="text-[#4A4E69]/80 text-lg -mt-2">Spin & Win!</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+            <!-- ✅ WHEEL AREA -->
+            <div class="flex flex-col items-center relative">
+                <!-- Red Pointer -->
+                <div class="w-0 h-0 border-l-[16px] border-r-[16px] border-t-[24px] border-l-transparent border-r-transparent border-t-[#E63946] mb-2 filter drop-shadow-[0_0_6px_rgba(230,57,70,0.7)] z-10"></div>
+
+                <!-- ✅ WHEEL + PERFECTLY CENTERED BUTTON -->
+                <div class="relative w-[480px] h-[480px]">
+                    <canvas id="wheel" width="480" height="480" class="absolute top-0 left-0 rounded-full border-[8px] border-[#1A237E] bg-white shadow-xl"></canvas>
+                    
+                    <!-- ✅ TAP TO SPIN - EXACTLY CENTERED INSIDE WHEEL -->
+                    <button id="spinButton" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-white rounded-full text-[#1A237E] font-bold text-lg shadow-[0_0_15px_rgba(255,193,7,0.5)] hover:shadow-[0_0_25px_rgba(255,193,7,0.8)] hover:scale-105 transition-all duration-300 ripple border-[5px] border-[#FFC107] pulse-glow flex items-center justify-center text-center leading-tight z-20">
+                        Tap to<br>Spin
+                    </button>
+                </div>
+            </div>
+
+            <!-- ✅ RIGHT PANEL -->
+            <div class="text-[#1A237E] space-y-5">
+                <textarea id="namesInput" rows="10" class="w-full bg-white/95 backdrop-blur-sm border-[4px] border-[#1A237E] rounded-xl p-4 text-lg text-[#1A237E] focus:border-[#E63946] outline-none transition-all shadow-lg" oninput="redrawWheel()">Diya
+Beatriz
+Eric
+Fatima
+Hanna
+Gabriel</textarea>
+
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" class="w-4 h-4 accent-[#E63946] transition-transform group-hover:scale-105">
+                    <span class="font-medium text-base group-hover:translate-x-1 transition-transform">Show Duplicate Entries</span>
+                </label>
+
+                <div class="flex gap-4">
+                    <button onclick="shuffleNames()" class="w-1/2 bg-[#3949AB] hover:bg-[#1A237E] py-3 rounded-lg font-semibold text-base transition-all ripple shadow-lg hover:-translate-y-0.5 text-white">
+                        🔀 Shuffle
+                    </button>
+                    <button onclick="clearAllNames()" class="w-1/2 bg-[#E63946] hover:bg-[#d62828] py-3 rounded-lg font-semibold text-base transition-all ripple shadow-lg hover:-translate-y-0.5 text-white">
+                        🗑️ Clear Names
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ FOOTER -->
+        <div class="text-center mt-10 text-[#4A4E69]/90 font-medium text-base">
+            ReelGames©2026
+        </div>
+    </div>
+
+    <!-- ✅ WINNER POPUP -->
+    <div id="winnerPopup" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-[popupShow_0.4s_ease-out] border-4 border-white">
+            <div class="bg-gradient-to-r from-[#E63946] to-[#ff6b6b] py-4 px-5">
+                <h2 class="text-white font-bold text-xl text-center text-shadow">🎉 WE HAVE A WINNER! 🎉</h2>
+            </div>
+            <div class="bg-gradient-to-br from-[#F3E5F5] to-[#fff5f8] py-10 px-5 text-center">
+                <p id="winnerText" class="text-[#1A237E] text-6xl font-black animate-bounce text-shadow"></p>
+            </div>
+            <div class="bg-[#F3E5F5] flex justify-center gap-5 p-4 border-t-2 border-[#3949AB]/20">
+                <button onclick="closePopup()" class="px-5 py-2 text-[#1A237E] hover:bg-[#BBDEFB] rounded-lg transition-all font-medium hover:scale-105">Close</button>
+                <button onclick="removeWinner()" class="bg-[#3949AB] hover:bg-[#1A237E] px-5 py-2 text-white rounded-lg transition-all font-medium hover:scale-105">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+    <script>
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+
+        // ✅ COLORS EXACTLY LIKE YOUR SCREENSHOT
+        const colors = [
+            '#FFD6E0',   // Diya     → TOP ✔️
+            '#E2D5F3',   // Beatriz  → RIGHT TOP ✔️
+            '#FFE4B5',   // Eric     → RIGHT BOTTOM ✔️
+            '#C6E2FF',   // Fatima   → BOTTOM ✔️
+            '#C1F0F3',   // Hanna    → LEFT BOTTOM ✔️
+            '#FFC2D1'    // Gabriel  → LEFT TOP ✔️
+        ];
+
+        let names = [];
+        let rotation = 0;
+        let spinning = false;
+        let lastWinner = '';
+        let sounds = {
+            spin: new Howl({src:['https://assets.mixkit.co/sfx/preview/mixkit-soft-long-wind-1337.mp3'], volume:0.3, loop: true}),
+            ding: new Howl({src:['https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-2216.mp3'], volume:0.7}),
+            win: new Howl({src:['https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'], volume:0.6})
+        };
+
+        // ✅ PERFECT ALIGNMENT & ROTATION
+        function redrawWheel(highlightIndex = -1) {
+            const input = document.getElementById('namesInput').value.trim();
+            names = input.split('\n').map(n => n.trim()).filter(n => n);
+            const total = names.length;
+            if(total < 1) return ctx.clearRect(0,0,480,480);
+
+            const angleStep = (2 * Math.PI) / total;
+            const center = 240;
+            const radius = 240;
+            const textOffset = radius - 32;
+
+            ctx.clearRect(0,0,480,480);
+
+            for(let i=0; i<total; i++) {
+                // START DRAWING FROM TOP (0°)
+                const startAngle = i * angleStep - Math.PI/2;
+                const endAngle = (i+1) * angleStep - Math.PI/2;
+                const midAngle = startAngle + angleStep / 2;
+
+                // Draw segment
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, startAngle, endAngle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                
+                // Border
+                ctx.strokeStyle = '#1A237E';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Highlight winner
+                if(i === highlightIndex) {
+                    ctx.shadowColor = colors[i];
+                    ctx.shadowBlur = 25;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    ctx.lineWidth = 2;
+                }
+
+                // ✅ CORRECT TEXT ROTATION - READS OUTWARD, NO ERRORS
+                ctx.save();
+                ctx.translate(center, center);
+                
+                const x = textOffset * Math.cos(midAngle);
+                const y = textOffset * Math.sin(midAngle);
+                ctx.translate(x, y);
+                ctx.rotate(midAngle);
+
+                // Fix direction
+                if (midAngle > Math.PI/2 && midAngle < 3*Math.PI/2) ctx.rotate(Math.PI);
+
+                ctx.fillStyle = '#1A237E';
+                ctx.font = 'bold 20px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(names[i], 0, 0);
+                ctx.restore();
+            }
+        }
+
+        // ✅ SPIN FUNCTION
+        document.getElementById('spinButton').addEventListener('click', () => {
+            if(spinning || names.length < 2) return;
+            spinning = true;
+            sounds.spin.play();
+            canvas.classList.add('spin-blur');
+
+            const duration = 5000 + Math.random() * 2000;
+            const spinRot = 360 * (5 + Math.random() * 3);
+            const start = Date.now();
+            const startRot = rotation;
+
+            function animate() {
+                const prog = Math.min((Date.now() - start)/duration, 1);
+                const ease = 1 - Math.pow(1 - prog, 4);
+                rotation = startRot + spinRot * ease;
+                canvas.style.transform = `rotate(${rotation}deg)`;
+
+                if(prog < 1) requestAnimationFrame(animate);
+                else stopSpin();
+            }
+            requestAnimationFrame(animate);
+        });
+
+        function stopSpin() {
+            spinning = false;
+            sounds.spin.stop();
+            sounds.ding.play();
+            canvas.classList.remove('spin-blur');
+
+            const total = names.length;
+            const step = 360 / total;
+            const norm = (360 - (rotation % 360)) % 360;
+            const idx = Math.floor(norm / step) % total;
+            lastWinner = names[idx];
+
+            canvas.style.setProperty('--r', rotation + 'deg');
+            canvas.style.animation = 'bounceStop 1s ease-out';
+            redrawWheel(idx);
+            
+            confetti({
+                particleCount: 250,
+                spread: 90,
+                colors: ['#FFD6E0','#E2D5F3','#FFE4B5','#C6E2FF','#C1F0F3','#FFC2D1','#FFC107','#E63946'],
+                origin: { y: 0.5 }
+            });
+
+            sounds.win.play();
+            document.getElementById('winnerText').textContent = lastWinner;
+            document.getElementById('winnerPopup').classList.remove('hidden');
+        }
+
+        // ✅ FUNCTIONS
+        function shuffleNames() {
+            let arr = [...names];
+            for(let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            document.getElementById('namesInput').value = arr.join('\n');
+            redrawWheel();
+        }
+
+        function clearAllNames() {
+            document.getElementById('namesInput').value = '';
+            redrawWheel();
+        }
+
+        function closePopup() {
+            document.getElementById('winnerPopup').classList.add('hidden');
+            canvas.style.animation = '';
+        }
+        function removeWinner() {
+            names = names.filter(n => n !== lastWinner);
+            document.getElementById('namesInput').value = names.join('\n');
+            redrawWheel();
+            closePopup();
+        }
+
+        // ✅ FULL SCREEN TOGGLE
+        function toggleFullScreen() {
+            const container = document.getElementById('mainContainer');
+            const btn = document.getElementById('fullscreenBtn');
+            
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                container.classList.add('fullscreen-mode');
+                btn.textContent = '🔽 Exit Full Screen';
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                container.classList.remove('fullscreen-mode');
+                btn.textContent = '📺 Full Screen';
+            }
+        }
+
+        // Init
+        redrawWheel();
+    </script>
+</body>
+</html>

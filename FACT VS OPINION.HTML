@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fact vs Opinion - Classroom Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sky: '#87CEFA',
+                        forest: '#228B22',
+                        yellow: '#FFD700',
+                        orange: '#FF9800',
+                        cream: '#FFF9C4',
+                        greenBtn: '#28A745',
+                        blueBtn: '#2563EB',
+                    },
+                    fontFamily: {
+                        fredoka: ['"Fredoka One"', 'cursive'],
+                        nunito: ['Nunito', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto { content-visibility: auto; }
+            .text-shadow { text-shadow: 2px 2px 0px rgba(0,0,0,0.15); }
+            .border-shadow { box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+            .leaf { animation: sway 4s ease-in-out infinite alternate; }
+            .sparkle { animation: float 3s ease-in-out infinite alternate; }
+            @keyframes sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+            @keyframes float { 0% { transform: translateY(0px); opacity: 0.8; } 100% { transform: translateY(-15px); opacity: 1; } }
+            @keyframes pulse-ring {
+                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+                70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+            }
+            .animate-pulse-ring { animation: pulse-ring 2s infinite; }
+            .popup-overlay { background-color: rgba(0,0,0,0.6); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-sky to-forest min-h-screen font-nunito text-gray-800 overflow-x-hidden relative">
+    
+    <!-- Background Animations -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div class="leaf absolute top-[10%] left-[5%] text-yellow text-4xl">🌿</div>
+        <div class="leaf absolute top-[20%] right-[8%] text-yellow text-5xl" style="animation-delay: 1s">🍃</div>
+        <div class="leaf absolute bottom-[15%] left-[10%] text-yellow text-4xl" style="animation-delay: 2s">🌿</div>
+        <div class="leaf absolute top-[40%] right-[15%] text-yellow text-3xl" style="animation-delay: 3s">🍃</div>
+        <div class="sparkle absolute top-[30%] left-[20%] w-2 h-2 bg-yellow rounded-full"></div>
+        <div class="sparkle absolute top-[60%] right-[25%] w-2 h-2 bg-yellow rounded-full" style="animation-delay: 1s"></div>
+        <div class="sparkle absolute top-[10%] right-[40%] w-1.5 h-1.5 bg-yellow rounded-full" style="animation-delay: 2s"></div>
+        <div class="sparkle absolute bottom-[20%] left-[35%] w-2 h-2 bg-yellow rounded-full" style="animation-delay: 3s"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 relative z-10 max-w-5xl">
+
+        <!-- ========================================== -->
+        <!--               MAIN MENU SCREEN            -->
+        <!-- ========================================== -->
+        <div id="menuScreen" class="screen text-center py-20">
+            <h1 class="font-fredoka text-[clamp(2.5rem,6vw,4rem)] text-yellow text-shadow mb-4">FACT VS OPINION</h1>
+            <p class="text-white text-xl mb-12 font-semibold">CLASSROOM ADVENTURE</p>
+            <div class="bg-cream/90 backdrop-blur-sm rounded-[2rem] p-10 border-4 border-yellow border-shadow max-w-md mx-auto">
+                <button onclick="goToScreen('setupScreen')" class="w-full bg-greenBtn hover:bg-greenBtn/90 text-white font-fredoka text-xl py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-[1.05] hover:shadow-lg mb-4">SETUP GAME</button>
+                <button onclick="startGameDirect()" class="w-full bg-gradient-to-r from-orange to-yellow text-white font-fredoka text-xl py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-[1.05] hover:shadow-lg opacity-50" id="startBtn">START GAME</button>
+            </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!--               SETUP SCREEN                -->
+        <!-- ========================================== -->
+        <div id="setupScreen" class="screen hidden">
+            <div class="bg-cream/90 backdrop-blur-sm rounded-[2rem] p-8 border-4 border-yellow border-shadow">
+                <h2 class="font-fredoka text-4xl text-center text-yellow text-shadow mb-8">TEAM SETUP</h2>
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label class="block font-bold mb-2 text-lg">TEAM 1 NAME</label>
+                        <input type="text" id="team1Name" class="w-full p-4 rounded-xl border-2 border-yellow focus:outline-none focus:ring-2 ring-orange" placeholder="e.g. Lion">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2 text-lg">TEAM 2 NAME</label>
+                        <input type="text" id="team2Name" class="w-full p-4 rounded-xl border-2 border-yellow focus:outline-none focus:ring-2 ring-orange" placeholder="e.g. Monkey">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-4 md:flex-row md:justify-center mb-8">
+                    <button onclick="openInstructions()" class="bg-blueBtn hover:bg-blueBtn/90 text-white font-bold py-3 px-6 rounded-full transition">INSTRUCTIONS</button>
+                    <button onclick="goToScreen('addScreen')" class="bg-gradient-to-r from-orange to-yellow text-white font-fredoka text-lg py-3 px-8 rounded-full transition-all hover:scale-105">SAVE & CONTINUE</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!--             ADD STATEMENTS SCREEN         -->
+        <!-- ========================================== -->
+        <div id="addScreen" class="screen hidden">
+            <div class="bg-cream/90 backdrop-blur-sm rounded-[2rem] p-8 border-4 border-yellow border-shadow">
+                <h2 class="font-fredoka text-4xl text-center text-yellow text-shadow mb-6">ADD STATEMENTS</h2>
+
+                <div id="statementList" class="w-full h-64 bg-white rounded-xl border-2 border-yellow p-4 mb-6 overflow-y-auto text-left">
+                    <p class="text-gray-500 italic text-center">No statements added yet...</p>
+                </div>
+
+                <div class="flex justify-center gap-6 mb-6">
+                    <button id="factBtn" onclick="selectType('FACT')" class="w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all">FACT</button>
+                    <button id="opinionBtn" onclick="selectType('OPINION')" class="w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all">OPINION</button>
+                </div>
+
+                <div id="inputContainer" class="hidden mb-6 transition-all">
+                    <label id="inputLabel" class="block text-center font-bold text-lg mb-2"></label>
+                    <textarea id="newStatement" class="w-full p-4 rounded-xl border-2 border-yellow h-32 focus:outline-none focus:ring-2 ring-greenBtn" placeholder="Type one sentence OR paste many... separate with PERIODS (.)"></textarea>
+                    <div class="flex justify-center gap-4 mt-4">
+                        <button onclick="addItem()" class="bg-greenBtn text-white font-fredoka px-8 py-3 rounded-full hover:scale-105 transition">ADD TO BANK</button>
+                        <button onclick="clearInput()" class="bg-red-500 text-white px-6 py-2 rounded-full text-sm">CANCEL</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600 mt-2">💡 All items saved as selected type | Auto-split at every <strong>.</strong></p>
+                </div>
+
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <button onclick="clearAll()" class="text-red-600 font-semibold hover:underline">CLEAR ALL</button>
+                    <button onclick="shuffleStatements()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-5 rounded-full transition shadow-md">🔀 SHUFFLE STATEMENTS</button>
+                    <button onclick="goToScreen('gameScreen')" class="bg-gradient-to-r from-orange to-yellow text-white font-fredoka text-lg py-3 px-10 rounded-full hover:scale-105 transition">FINISH & START</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!--                GAME PLAY SCREEN           -->
+        <!-- ========================================== -->
+        <div id="gameScreen" class="screen hidden">
+            <div class="flex justify-between items-center mb-6 bg-cream/80 rounded-full py-3 px-6 border-2 border-yellow">
+                <div class="font-fredoka text-xl md:text-2xl">
+                    <span id="t1NameDisplay">TEAM 1</span>: <span id="t1Score" class="text-greenBtn font-bold">0</span> 
+                    <span class="mx-2">|</span> 
+                    <span id="t2NameDisplay">TEAM 2</span>: <span id="t2Score" class="text-greenBtn font-bold">0</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleFullScreen()" class="bg-yellow/50 hover:bg-yellow/80 w-9 h-9 rounded-full flex items-center justify-center font-bold">⛶</button>
+                    <button onclick="goToScreen('menuScreen')" class="bg-red-400 hover:bg-red-500 w-9 h-9 rounded-full flex items-center justify-center text-white">⏹</button>
+                </div>
+            </div>
+
+            <div class="bg-cream/90 backdrop-blur-sm rounded-[2rem] p-8 border-4 border-yellow border-shadow text-center">
+                
+                <div class="mb-8">
+                    <p class="font-bold text-lg mb-2">QUESTION <span id="qNum">1</span> OF <span id="qTotal">10</span></p>
+                    <p id="turnIndicator" class="font-fredoka text-2xl text-orange mb-3">TEAM 1'S TURN</p>
+                    <div class="relative w-28 h-28 mx-auto mb-4">
+                        <div class="absolute inset-0 rounded-full border-4 border-yellow animate-pulse-ring"></div>
+                        <div id="timerDisplay" class="absolute inset-0 flex items-center justify-center font-fredoka text-4xl text-red-600">10</div>
+                    </div>
+                </div>
+
+                <div id="statementDisplay" class="text-2xl md:text-3xl font-bold mb-10 min-h-[80px] flex items-center justify-center px-4">Ready...</div>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-10">
+                    <div id="team1Panel" class="bg-white/60 rounded-2xl p-6 border-4 transition-all">
+                        <h3 class="font-fredoka text-2xl text-greenBtn" id="p1Name">TEAM 1</h3>
+                        <p class="text-4xl font-bold my-2" id="p1Score">0</p>
+                        <span id="p1Status" class="inline-block bg-gray-200 px-4 py-1 rounded-full font-semibold">READY</span>
+                    </div>
+                    <div id="team2Panel" class="bg-white/60 rounded-2xl p-6 border-4 transition-all">
+                        <h3 class="font-fredoka text-2xl text-orange" id="p2Name">TEAM 2</h3>
+                        <p class="text-4xl font-bold my-2" id="p2Score">0</p>
+                        <span id="p2Status" class="inline-block bg-gray-200 px-4 py-1 rounded-full font-semibold">READY</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-6 mb-3">
+                    <button onclick="checkAnswer('FACT')" class="w-48 py-4 rounded-full font-fredoka text-xl bg-greenBtn text-white hover:scale-105 transition shadow-lg">FACT</button>
+                    <button onclick="checkAnswer('OPINION')" class="w-48 py-4 rounded-full font-fredoka text-xl bg-gradient-to-r from-orange to-yellow text-white hover:scale-105 transition shadow-lg">OPINION</button>
+                </div>
+                <p class="text-sm text-gray-600">+3 Correct | +1 Wrong | +1 Speed Bonus</p>
+
+            </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!--               FINAL SCORE SCREEN (UPDATED) -->
+        <!-- ========================================== -->
+        <div id="finalScreen" class="screen hidden text-center">
+            <div class="bg-cream/90 backdrop-blur-sm rounded-[2rem] p-10 border-4 border-yellow border-shadow relative overflow-hidden">
+                <h2 class="font-fredoka text-[clamp(2rem,5vw,3.5rem)] text-yellow text-shadow mb-8 flex items-center justify-center gap-4">
+                    🏆 FINAL SCORES 🏆
+                </h2>
+                <div id="finalResults" class="space-y-4 mb-12 text-xl font-bold"></div>
+                <div class="flex justify-center gap-6 flex-wrap">
+                    <button onclick="resetGame()" class="bg-greenBtn hover:bg-greenBtn/90 text-white font-fredoka text-lg py-3 px-8 rounded-full transition transform hover:scale-105 shadow-md">PLAY AGAIN</button>
+                    <button onclick="goToScreen('menuScreen')" class="bg-gradient-to-r from-orange to-yellow text-white font-fredoka text-lg py-3 px-8 rounded-full transition transform hover:scale-105 shadow-md">EXIT TO MAIN</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- ✅ INSTRUCTIONS POP-UP -->
+        <!-- ========================================== -->
+        <div id="instructionsPopup" class="fixed inset-0 popup-overlay z-50 hidden flex items-center justify-center">
+            <div class="bg-cream rounded-[2rem] p-6 border-4 border-yellow border-shadow max-w-md w-full mx-4 relative">
+                <h2 class="font-fredoka text-2xl text-center text-yellow text-shadow mb-4">📜 HOW TO PLAY</h2>
+                
+                <div class="text-left space-y-2 text-sm mb-5 leading-tight">
+                    <p><strong>🎯 OBJECTIVE:</strong> Identify if each statement is a <strong>FACT</strong> or an <strong>OPINION</strong>.</p>
+                    
+                    <p><strong>🔁 TURNS:</strong><br>
+                    • Random team starts each round → 10 seconds<br>
+                    • If answer WRONG → <strong>AUTOMATIC TURN TO OTHER TEAM</strong><br>
+                    • Then other team answers SAME question → 10 seconds<br>
+                    • If time runs out, other team still plays</p>
+                    
+                    <p><strong>⭐ SCORING:</strong><br>
+                    • ✅ Correct = <strong>+3 pts</strong><br>
+                    • ❌ Wrong = <strong>+1 pt</strong><br>
+                    • ⚡ Fast answer = <strong>+1 Bonus</strong></p>
+                    
+                    <p><strong>⚙️ SETUP:</strong> Add or paste statements — auto-splits & auto-labels.</p>
+                    <p><strong>🔀 SHUFFLE:</strong> Randomize order anytime.</p>
+                </div>
+
+                <button onclick="closeInstructions()" class="w-full bg-red-500 hover:bg-red-600 text-white font-fredoka py-2.5 px-6 rounded-full transition text-lg">EXIT / CLOSE</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let statements = [];
+        let currentType = null;
+        let currentIndex = 0;
+        let timer;
+        let timeLeft = 10;
+        let currentActiveTeam = 1;
+        let teams = { t1: { name: "Team 1", score: 0 }, t2: { name: "Team 2", score: 0 } };
+
+        function goToScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'gameScreen' && statements.length > 0) startRound();
+            if(id === 'finalScreen') showFinalResults();
+        }
+
+        function openInstructions() {
+            document.getElementById('instructionsPopup').classList.remove('hidden');
+            document.getElementById('instructionsPopup').classList.add('flex');
+        }
+        function closeInstructions() {
+            document.getElementById('instructionsPopup').classList.add('hidden');
+            document.getElementById('instructionsPopup').classList.remove('flex');
+        }
+
+        function selectType(type) {
+            currentType = type;
+            document.getElementById('factBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all";
+            document.getElementById('opinionBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all";
+            if(type === 'FACT') {
+                document.getElementById('factBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-greenBtn text-white scale-105 shadow-md transition-all";
+                document.getElementById('inputLabel').innerText = "ENTER OR PASTE — ALL SAVED AS ✅ FACT";
+            } else {
+                document.getElementById('opinionBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-gradient-to-r from-orange to-yellow text-white scale-105 shadow-md transition-all";
+                document.getElementById('inputLabel').innerText = "ENTER OR PASTE — ALL SAVED AS ❌ OPINION";
+            }
+            document.getElementById('inputContainer').classList.remove('hidden');
+            document.getElementById('newStatement').value = "";
+        }
+
+        function addItem() {
+            const rawText = document.getElementById('newStatement').value.trim();
+            if(!rawText || !currentType) return;
+            let items = rawText.split('.').map(s => s.trim()).filter(s => s.length > 2);
+            items.forEach(text => statements.push({ text, type: currentType }));
+            updateStatementList();
+            clearInput();
+            document.getElementById('startBtn').classList.remove('opacity-50');
+        }
+
+        function updateStatementList() {
+            const listEl = document.getElementById('statementList');
+            if(statements.length === 0) { listEl.innerHTML = '<p class="text-gray-500 italic text-center">No statements added yet...</p>'; return; }
+            listEl.innerHTML = "";
+            statements.forEach((item, i) => {
+                const el = document.createElement('div');
+                el.className = "mb-2 pb-2 border-b border-yellow/30 flex justify-between items-start";
+                el.innerHTML = `<div><span class="font-bold ${item.type === 'FACT' ? 'text-green-600' : 'text-orange-500'}">${i+1}. ${item.type === 'FACT' ? '✅ FACT' : '❌ OPINION'}:</span> ${item.text}</div><button onclick="deleteItem(${i})" class="text-red-500 text-sm ml-2">×</button>`;
+                listEl.appendChild(el);
+            });
+        }
+
+        function shuffleStatements() {
+            for (let i = statements.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [statements[i], statements[j]] = [statements[j], statements[i]];
+            }
+            updateStatementList();
+        }
+
+        function deleteItem(i) { statements.splice(i, 1); updateStatementList(); }
+        function clearInput() { document.getElementById('inputContainer').classList.add('hidden'); document.getElementById('factBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all"; document.getElementById('opinionBtn').className = "w-40 py-3 rounded-full font-fredoka text-lg bg-gray-300 text-gray-600 transition-all"; currentType = null; }
+        function clearAll() { statements = []; updateStatementList(); document.getElementById('startBtn').classList.add('opacity-50'); }
+
+        function startGameDirect() {
+            if(statements.length === 0) return;
+            teams.t1.name = document.getElementById('team1Name')?.value || "Team 1";
+            teams.t2.name = document.getElementById('team2Name')?.value || "Team 2";
+            document.getElementById('t1NameDisplay').innerText = teams.t1.name;
+            document.getElementById('t2NameDisplay').innerText = teams.t2.name;
+            document.getElementById('p1Name').innerText = teams.t1.name;
+            document.getElementById('p2Name').innerText = teams.t2.name;
+            document.getElementById('qTotal').innerText = statements.length;
+            teams.t1.score = 0; teams.t2.score = 0; updateScores(); currentIndex = 0;
+            goToScreen('gameScreen');
+        }
+
+        function startRound() {
+            clearInterval(timer); timeLeft = 10;
+            document.getElementById('timerDisplay').innerText = timeLeft;
+            document.getElementById('qNum').innerText = currentIndex + 1;
+
+            document.getElementById('team1Panel').className = "bg-white/60 rounded-2xl p-6 border-4 transition-all";
+            document.getElementById('team2Panel').className = "bg-white/60 rounded-2xl p-6 border-4 transition-all";
+            document.getElementById('p1Status').className = "inline-block bg-gray-200 px-4 py-1 rounded-full font-semibold"; document.getElementById('p1Status').innerText = "READY";
+            document.getElementById('p2Status').className = "inline-block bg-gray-200 px-4 py-1 rounded-full font-semibold"; document.getElementById('p2Status').innerText = "READY";
+
+            // ✅ RANDOM STARTING TEAM
+            currentActiveTeam = Math.random() < 0.5 ? 1 : 2;
+            updateTurnDisplay();
+
+            const item = statements[currentIndex];
+            document.getElementById('statementDisplay').innerText = item.text;
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer); timeLeft = 10;
+            document.getElementById('timerDisplay').innerText = timeLeft;
+            document.getElementById('timerDisplay').classList.remove('text-red-700','scale-110');
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timerDisplay').innerText = timeLeft;
+                
+                // ✅ BEEP WARNING AT 3 SECONDS
+                if(timeLeft === 3) {
+                    document.getElementById('timerDisplay').classList.add('text-red-700','scale-110');
+                }
+
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTurnDisplay() {
+            document.getElementById('turnIndicator').innerText = `TEAM ${currentActiveTeam}'S TURN`;
+            if(currentActiveTeam === 1) {
+                document.getElementById('team1Panel').classList.add('border-greenBtn','scale-[1.02]','shadow-md');
+                document.getElementById('team2Panel').classList.remove('border-orange','scale-[1.02]','shadow-md');
+            } else {
+                document.getElementById('team2Panel').classList.add('border-orange','scale-[1.02]','shadow-md');
+                document.getElementById('team1Panel').classList.remove('border-greenBtn','scale-[1.02]','shadow-md');
+            }
+        }
+
+        function checkAnswer(choice) {
+            clearInterval(timer);
+            const item = statements[currentIndex];
+            const correct = item.type;
+            const bonus = timeLeft > 5 ? 1 : 0;
+            const isCorrect = (choice === correct);
+            const points = isCorrect ? (3 + bonus) : 1;
+
+            if(currentActiveTeam === 1) {
+                teams.t1.score += points;
+                document.getElementById('p1Status').className = `inline-block ${isCorrect ? 'bg-green-400' : 'bg-red-400'} text-white px-4 py-1 rounded-full font-semibold`;
+                document.getElementById('p1Status').innerText = isCorrect ? `CORRECT +${points}` : `WRONG +${points}`;
+                
+                if(!isCorrect) {
+                    currentActiveTeam = 2;
+                    updateTurnDisplay();
+                    startTimer();
+                } else {
+                    currentActiveTeam = 2;
+                    updateTurnDisplay();
+                    startTimer();
+                }
+            } else {
+                teams.t2.score += points;
+                document.getElementById('p2Status').className = `inline-block ${isCorrect ? 'bg-green-400' : 'bg-red-400'} text-white px-4 py-1 rounded-full font-semibold`;
+                document.getElementById('p2Status').innerText = isCorrect ? `CORRECT +${points}` : `WRONG +${points}`;
+                endQuestion();
+            }
+
+            updateScores();
+        }
+
+        function handleTimeUp() {
+            if(currentActiveTeam === 1) {
+                document.getElementById('p1Status').className = "inline-block bg-yellow-400 text-white px-4 py-1 rounded-full font-semibold";
+                document.getElementById('p1Status').innerText = "TIME UP";
+                currentActiveTeam = 2;
+                updateTurnDisplay();
+                startTimer();
+            } else {
+                document.getElementById('p2Status').className = "inline-block bg-yellow-400 text-white px-4 py-1 rounded-full font-semibold";
+                document.getElementById('p2Status').innerText = "TIME UP";
+                endQuestion();
+            }
+        }
+
+        function endQuestion() {
+            const correct = statements[currentIndex].type;
+            document.getElementById('statementDisplay').innerHTML += `<br><span class="text-lg text-green-700 font-normal">✅ Correct Answer: ${correct}</span>`;
+            
+            setTimeout(() => {
+                currentIndex++;
+                if(currentIndex >= statements.length) goToScreen('finalScreen');
+                else startRound();
+            }, 2500);
+        }
+
+        function updateScores() {
+            document.getElementById('t1Score').innerText = teams.t1.score;
+            document.getElementById('t2Score').innerText = teams.t2.score;
+            document.getElementById('p1Score').innerText = teams.t1.score;
+            document.getElementById('p2Score').innerText = teams.t2.score;
+        }
+
+        // ✅ UPDATED FINAL SCREEN: DRAW + MEDALS
+        function showFinalResults() {
+            const resEl = document.getElementById('finalResults');
+            resEl.innerHTML = "";
+            const t1 = teams.t1;
+            const t2 = teams.t2;
+
+            let html = "";
+
+            if(t1.score > t2.score) {
+                html = `
+                    <div class="p-8 rounded-2xl border-4 border-yellow bg-yellow/40 scale-105 shadow-xl max-w-md mx-auto mb-4">
+                        <p class="text-2xl font-bold">🥇 ${t1.name}</p>
+                        <p class="text-5xl font-bold text-greenBtn my-3">${t1.score} POINTS</p>
+                        <p class="text-orange text-xl font-semibold">🏆 WINNER!</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-4 border-orange/30 bg-white/50 max-w-md mx-auto">
+                        <p class="text-2xl font-bold">🥈 ${t2.name}</p>
+                        <p class="text-4xl font-bold text-greenBtn my-2">${t2.score} POINTS</p>
+                    </div>
+                `;
+                confetti({ particleCount: 400, spread: 90, origin: { y: 0.4 }, colors: ['#FFD700','#FF9800','#28A745'] });
+            } else if(t2.score > t1.score) {
+                html = `
+                    <div class="p-8 rounded-2xl border-4 border-yellow bg-yellow/40 scale-105 shadow-xl max-w-md mx-auto mb-4">
+                        <p class="text-2xl font-bold">🥇 ${t2.name}</p>
+                        <p class="text-5xl font-bold text-greenBtn my-3">${t2.score} POINTS</p>
+                        <p class="text-orange text-xl font-semibold">🏆 WINNER!</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-4 border-orange/30 bg-white/50 max-w-md mx-auto">
+                        <p class="text-2xl font-bold">🥈 ${t1.name}</p>
+                        <p class="text-4xl font-bold text-greenBtn my-2">${t1.score} POINTS</p>
+                    </div>
+                `;
+                confetti({ particleCount: 400, spread: 90, origin: { y: 0.4 }, colors: ['#FFD700','#FF9800','#28A745'] });
+            } else {
+                html = `
+                    <div class="p-8 rounded-2xl border-4 border-blue-400 bg-blue-50 scale-105 shadow-xl max-w-md mx-auto">
+                        <p class="text-2xl font-bold">🤝 IT'S A DRAW!</p>
+                        <div class="flex justify-around items-center mt-4">
+                            <div>
+                                <p class="text-xl">${t1.name}</p>
+                                <p class="text-4xl font-bold text-greenBtn">${t1.score}</p>
+                            </div>
+                            <div>
+                                <p class="text-xl">${t2.name}</p>
+                                <p class="text-4xl font-bold text-greenBtn">${t2.score}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resEl.innerHTML = html;
+        }
+
+        function resetGame() { statements = []; currentIndex = 0; teams.t1.score = 0; teams.t2.score = 0; goToScreen('menuScreen'); }
+        function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); }
+    </script>
+</body>
+</html>

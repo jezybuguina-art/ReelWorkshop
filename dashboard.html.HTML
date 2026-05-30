@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reel Workshop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background: linear-gradient(to bottom, #87CEEB, #E0F7FA); min-height: 100vh; position: relative; overflow-x: hidden; }
+        h1, h2 { font-family: 'Fredoka One', cursive; }
+        .game-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .game-card:hover { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .grass-field { background: #98FB98; height: 100px; position: absolute; bottom: 0; width: 100%; border-top-left-radius: 50% 100%; border-top-right-radius: 50% 100%; }
+    </style>
+</head>
+<body class="flex flex-col items-center pt-16 px-4">
+
+    <div class="absolute top-0 w-full h-32 bg-gradient-to-b from-pink-300 via-yellow-200 to-transparent opacity-50"></div>
+
+    <header class="text-center z-10 mb-12">
+        <h1 class="text-6xl text-white drop-shadow-lg tracking-wide" style="text-shadow: 3px 3px 0 #FF6B6B;">REEL WORKSHOP</h1>
+        <p class="text-2xl text-blue-900 font-bold mt-2">Select a game to start the fun!</p>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl z-10">
+        <a href="FACT VS OPINION.HTML" class="game-card bg-white p-6 rounded-3xl border-t-8 border-green-400 shadow-xl text-center">
+            <h2 class="text-2xl text-green-600 mb-2">Fact vs Opinion</h2>
+            <p class="text-gray-600">Test your knowledge with this classroom adventure.</p>
+        </a>
+
+        <a href="ROLLTHEDICE.html" class="game-card bg-white p-6 rounded-3xl border-t-8 border-orange-400 shadow-xl text-center">
+            <h2 class="text-2xl text-orange-600 mb-2">Math Dice</h2>
+            <p class="text-gray-600">Roll the dice and solve the math challenge!</p>
+        </a>
+
+        <a href="wheel of names.HTML" class="game-card bg-white p-6 rounded-3xl border-t-8 border-purple-400 shadow-xl text-center">
+            <h2 class="text-2xl text-purple-600 mb-2">Wheel of Names</h2>
+            <p class="text-gray-600">Spin the wheel to make your selection.</p>
+        </a>
+
+        <a href="WORDSEARCH.HTML" class="game-card bg-white p-6 rounded-3xl border-t-8 border-blue-400 shadow-xl text-center">
+            <h2 class="text-2xl text-blue-600 mb-2">Word Search</h2>
+            <p class="text-gray-600">Find hidden words in the custom grid.</p>
+        </a>
+    </main>
+
+    <footer class="mt-auto py-8 text-blue-800 font-bold opacity-70 z-10">
+        <p>ReelGames@2026</p>
+    </footer>
+
+    <div class="grass-field"></div>
+</body>
+</html>

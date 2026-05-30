@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roll The Math Dice!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Luckiest+Guy&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Chewy', cursive;
+        }
+
+        /* Color Palette */
+        :root {
+            --yellow: #FFFD82;
+            --orange: #FF9F1C;
+            --teal: #2EC4B6;
+            --red: #E71D36;
+            --purple-gradient: linear-gradient(135deg, #A78BFA, #7C3AED);
+            --warm-gradient: linear-gradient(135deg, #FFE29F, #FFA07A, #FF6B6B, #FFD166);
+        }
+
+        /* Background Animation */
+        @keyframes bgFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Title Float Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(-10px); }
+            50% { transform: translateY(10px); }
+        }
+
+        /* Dice Rotation */
+        @keyframes smoothRoll {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: rotateX(720deg) rotateY(1080deg) rotateZ(360deg); }
+        }
+
+        /* Main Screen */
+        #mainScreen {
+            height: 100vh;
+            width: 100vw;
+            background: var(--warm-gradient);
+            background-size: 400% 400%;
+            animation: bgFlow 12s ease infinite;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: clamp(3rem, 12vw, 6.5rem);
+            color: var(--yellow);
+            text-shadow: 0 0 15px var(--orange), 3px 3px 0 var(--red);
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+        }
+
+        #rollBtn {
+            background-color: var(--teal);
+            font-family: 'Luckiest Guy', cursive;
+            font-size: clamp(1.8rem, 7vw, 3.2rem);
+            color: white;
+            border: none;
+            padding: 35px 85px;
+            border-radius: 16px;
+            box-shadow: 0 8px 0 #1A7F72, 0 10px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        #rollBtn:active {
+            transform: translateY(8px);
+            box-shadow: none;
+        }
+
+        /* Game Screen */
+        #gameScreen {
+            height: 100vh;
+            width: 100vw;
+            background: var(--warm-gradient);
+            background-size: 400% 400%;
+            animation: bgFlow 12s ease infinite;
+            position: relative;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 3D Dice */
+        .dice-container {
+            width: 280px;
+            height: 280px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: smoothRoll 4s linear infinite;
+        }
+
+        .face {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background-color: white;
+            border-radius: 20px;
+            border: 4px solid var(--orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--red);
+            box-shadow: 0 0 8px var(--red);
+            position: absolute;
+        }
+
+        /* Dice Faces Positioning */
+        .front  { transform: translateZ(140px); }
+        .back   { transform: rotateY(180deg) translateZ(140px); }
+        .left   { transform: rotateY(-90deg) translateZ(140px); }
+        .right  { transform: rotateY(90deg) translateZ(140px); }
+        .top    { transform: rotateX(90deg) translateZ(140px); }
+        .bottom { transform: rotateX(-90deg) translateZ(140px); }
+
+        /* Dot Layouts */
+        .front .dot:nth-child(1) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .back .dot:nth-child(1) { top: 40px; left: 40px; }
+        .back .dot:nth-child(2) { bottom: 40px; right: 40px; }
+
+        .left .dot:nth-child(1) { top: 40px; left: 40px; }
+        .left .dot:nth-child(2) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .left .dot:nth-child(3) { bottom: 40px; right: 40px; }
+
+        .right .dot:nth-child(1) { top: 40px; left: 40px; }
+        .right .dot:nth-child(2) { top: 40px; right: 40px; }
+        .right .dot:nth-child(3) { bottom: 40px; left: 40px; }
+        .right .dot:nth-child(4) { bottom: 40px; right: 40px; }
+
+        .top .dot:nth-child(1) { top: 40px; left: 40px; }
+        .top .dot:nth-child(2) { top: 40px; right: 40px; }
+        .top .dot:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .top .dot:nth-child(4) { bottom: 40px; left: 40px; }
+        .top .dot:nth-child(5) { bottom: 40px; right: 40px; }
+
+        .bottom .dot:nth-child(1) { top: 40px; left: 40px; }
+        .bottom .dot:nth-child(2) { top: 40px; right: 40px; }
+        .bottom .dot:nth-child(3) { top: 50%; left: 40px; transform: translateY(-50%); }
+        .bottom .dot:nth-child(4) { top: 50%; right: 40px; transform: translateY(-50%); }
+        .bottom .dot:nth-child(5) { bottom: 40px; left: 40px; }
+        .bottom .dot:nth-child(6) { bottom: 40px; right: 40px; }
+
+        /* Popup */
+        #popup {
+            position: fixed;
+            inset: 0;
+            background: var(--purple-gradient);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        #popup h2 {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            color: white;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #equationText {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: clamp(6rem, 18vw, 12rem);
+            color: var(--yellow);
+            text-shadow: 0 0 10px rgba(255, 253, 130, 0.6);
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 95%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #rollAgainBtn, #exitBtn {
+            font-family: 'Luckiest Guy', cursive;
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            border: none;
+            padding: 20px 40px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #rollAgainBtn {
+            background-color: #22c55e;
+            box-shadow: 0 6px 0 #166534, 0 8px 10px rgba(0,0,0,0.2);
+        }
+
+        #exitBtn {
+            background-color: var(--red);
+            box-shadow: 0 6px 0 #990F1F, 0 8px 10px rgba(0,0,0,0.2);
+        }
+
+        #rollAgainBtn:active, #exitBtn:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        /* Signature */
+        .signature {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1rem;
+            z-index: 5;
+        }
+
+        /* Decorative Shapes */
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.25;
+            filter: blur(30px);
+            animation: float 6s infinite alternate ease-in-out;
+        }
+        .s1 { width: 200px; height: 200px; background: #FFD166; top: 10%; left: 15%; }
+        .s2 { width: 150px; height: 150px; background: #FF6B6B; top: 20%; right: 15%; animation-delay: 1s; }
+        .s3 { width: 180px; height: 180px; background: #2EC4B6; bottom: 15%; left: 20%; animation-delay: 2s; }
+        .s4 { width: 120px; height: 120px; background: #C77DFF; bottom: 20%; right: 20%; animation-delay: 3s; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Main Screen -->
+    <div id="mainScreen">
+        <div class="overlay"></div>
+        <div class="shape s1"></div>
+        <div class="shape s2"></div>
+        <div class="shape s3"></div>
+        <div class="shape s4"></div>
+
+        <h1>ROLL THE MATH DICE!</h1>
+        <button id="rollBtn">ROLL IT!</button>
+        <div class="signature">ReelGames@2026</div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen">
+        <div class="overlay"></div>
+        <div class="shape s1"></div>
+        <div class="shape s2"></div>
+        <div class="shape s3"></div>
+        <div class="shape s4"></div>
+
+        <div class="dice-container">
+            <div class="face front">
+                <div class="dot"></div>
+            </div>
+            <div class="face back">
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="face left">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="face right">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="face top">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="face bottom">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <div class="signature">ReelGames@2026</div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup">
+        <h2>SOLVE THIS!</h2>
+        <div id="equationText"></div>
+        <div class="btn-group">
+            <button id="rollAgainBtn">ROLL AGAIN!</button>
+            <button id="exitBtn">EXIT</button>
+        </div>
+        <div class="signature">ReelGames@2026</div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="rollSound" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9b0d8e4f.mp3">
+    <audio id="popSound" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_5c2b4c6e4f.mp3">
+
+    <script>
+        // Elements
+        const mainScreen = document.getElementById('mainScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const popup = document.getElementById('popup');
+        const rollBtn = document.getElementById('rollBtn');
+        const rollAgainBtn = document.getElementById('rollAgainBtn');
+        const exitBtn = document.getElementById('exitBtn');
+        const equationText = document.getElementById('equationText');
+        const rollSound = document.getElementById('rollSound');
+        const popSound = document.getElementById('popSound');
+
+        // Audio Play Helper
+        function playAudio(audio) {
+            audio.play().catch(e => {});
+        }
+
+        // Math Equation Generator
+        function generateEquation() {
+            const answer = Math.floor(Math.random() * 6) + 1;
+            const ops = ['+', '-', '*', '/'];
+            let op = ops[Math.floor(Math.random() * ops.length)];
+            let num1, num2;
+            const isPrime = n => [2,3,5].includes(n);
+
+            switch(op) {
+                case '+':
+                    num1 = Math.floor(Math.random() * (answer - 1)) + 1;
+                    num2 = answer - num1;
+                    break;
+                case '-':
+                    num1 = answer + Math.floor(Math.random() * 10) + 1;
+                    num2 = num1 - answer;
+                    break;
+                case '*':
+                    if (isPrime(answer)) {
+                        op = '+';
+                        num1 = Math.floor(Math.random() * (answer - 1)) + 1;
+                        num2 = answer - num1;
+                    } else {
+                        let factors = [];
+                        for(let i=2; i<=answer; i++) if(answer % i === 0) factors.push(i);
+                        num1 = factors[Math.floor(Math.random() * factors.length)];
+                        num2 = answer / num1;
+                    }
+                    break;
+                case '/':
+                    num2 = Math.floor(Math.random() * 5) + 1;
+                    num1 = answer * num2;
+                    break;
+            }
+
+            const symbols = { '+':'+', '-':'−', '*':'×', '/':'÷' };
+            return `${num1} ${symbols[op]} ${num2} = ?`;
+        }
+
+        // Game Flow
+        function startRoll() {
+            mainScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            popup.style.display = 'none';
+            playAudio(rollSound);
+
+            setTimeout(() => {
+                rollSound.pause();
+                rollSound.currentTime = 0;
+                playAudio(popSound);
+                equationText.innerText = generateEquation();
+                popup.style.display = 'flex';
+            }, 5000);
+        }
+
+        // Events
+        rollBtn.addEventListener('click', startRoll);
+        rollAgainBtn.addEventListener('click', startRoll);
+        exitBtn.addEventListener('click', () => {
+            popup.style.display = 'none';
+            gameScreen.style.display = 'none';
+            mainScreen.style.display = 'flex';
+            rollSound.pause();
+            rollSound.currentTime = 0;
+        });
+    </script>
+
+</body>
+</html>
